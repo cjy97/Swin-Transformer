@@ -47,6 +47,9 @@ def load_model(model_path, num_classes):
     model_dict =  model.state_dict()    
     save_model = torch.load(model_path)['model']
 
+    for k in model_dict:
+        print("key: ", k)
+
     new_state_dict = {}
     for k, v in save_model.items(): # 从预训练模型读取除最后一个Linear层外的其他部分参数
         if 'head' not in k:
@@ -61,7 +64,7 @@ def load_model(model_path, num_classes):
 
 def warm_up(model, cifar_trainloader, cifar_testloader, warm_up_epochs):
     for k, p in model.named_parameters():
-        if "head" not in k:         # 固定除最后一个Linear外的其他参数梯度
+        if "head" not in k and "MLP" not in k:         # 固定除最后一个Linear外的其他参数梯度
             p.requires_grad = False
 
     criterion = nn.CrossEntropyLoss()
@@ -78,8 +81,8 @@ def warm_up(model, cifar_trainloader, cifar_testloader, warm_up_epochs):
             optimizer.zero_grad()
             inputs = inputs.cuda()
             labels = labels.cuda()
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
+            outputs, loc_loss = model(inputs)
+            loss = criterion(outputs, labels) + 0.1 * loc_loss
             print(i, "  loss: ", loss)
             loss.backward()
 
@@ -94,7 +97,7 @@ def warm_up(model, cifar_trainloader, cifar_testloader, warm_up_epochs):
                 inputs, labels = data
                 inputs = inputs.cuda()
                 labels = labels.cuda()
-                outputs = model(inputs)
+                outputs, _ = model(inputs)
                 _, predicted = torch.max(outputs.data, 1)
 
                 total += labels.size(0)
@@ -132,8 +135,8 @@ if __name__ == '__main__':
             optimizer.zero_grad()
             inputs = inputs.cuda()
             labels = labels.cuda()
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
+            outputs, loc_loss = model(inputs)
+            loss = criterion(outputs, labels) + 0.1 * loc_loss
             print(i, "  loss: ", loss)
             loss.backward()
 
@@ -148,7 +151,7 @@ if __name__ == '__main__':
                 inputs, labels = data
                 inputs = inputs.cuda()
                 labels = labels.cuda()
-                outputs = model(inputs)
+                outputs, _ = model(inputs)
                 _, predicted = torch.max(outputs.data, 1)
 
                 total += labels.size(0)

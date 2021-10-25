@@ -5,8 +5,10 @@
 # Written by Ze Liu
 # --------------------------------------------------------
 
+from types import DynamicClassAttribute
 import torch
 import torch.nn as nn
+from torch.nn.modules.activation import ReLU
 import torch.utils.checkpoint as checkpoint
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 
@@ -454,6 +456,20 @@ class PatchEmbed(nn.Module):
             flops += Ho * Wo * self.embed_dim
         return flops
 
+class local_MLP(nn.Module):
+    def __init__(self, num_features, dim=512):
+        self.fc1 = nn.Linear(num_features, dim)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear()
+
+def position_sampling(k, m, n):
+    pos_1 = torch.randint(k, size=(n, m, 2))
+    pos_2 = torch.randint(k, size=(n, m, 2))
+    return pos_1, pos_2
+
+def collect_samples(x, pos, n):
+    return torch.stack([x[i, :, pos[i][:,0], pos[i][:,1]] for i in range(n)], dim=0)
+
 
 class SwinTransformer(nn.Module):
     r""" Swin Transformer
@@ -537,6 +553,14 @@ class SwinTransformer(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool1d(1)
         self.head = nn.Linear(self.num_features, num_classes) if num_classes > 0 else nn.Identity()
 
+        self.MLP = nn.Sequential(
+            nn.Linear(self.num_features*2, 512),
+            nn.ReLU(),
+            nn.Linear(512, 512),
+            nn.ReLU(),
+            nn.Linear(512, 2)
+        )
+
         self.apply(self._init_weights)
 
     def _init_weights(self, m):
@@ -566,14 +590,35 @@ class SwinTransformer(nn.Module):
             x = layer(x)
 
         x = self.norm(x)  # B L C
+
+        x_ = x.transpose(1, 2)  # B C L
+        B, C, L = x_.size()
+        # print("B, C, L: ", B, C, L) # 256 768 49
+        x_ = x_.view(B, C, int(L**0.5), int(L**0.5))  # B, C, k, k
+
+        n, D, k, k = x_.size()
+        m = 64
+        pos_1, pos_2 = position_sampling(k, m, n)
+
+        deltaxy = abs((pos_1-pos_2).float()) # [n, m, 2]
+        deltaxy /= k
+        deltaxy = deltaxy.cuda()
+
+        pts_1 = collect_samples(x_, pos_1, n).transpose(1,2) # [n, m, D]
+        pts_2 = collect_samples(x_, pos_2, n).transpose(1,2) # [n, m, D]
+        predxy = self.MLP(torch.cat([pts_1, pts_2], dim=2))
+
+        criteria = nn.L1Loss()
+        loc_loss = criteria(predxy, deltaxy)
+
         x = self.avgpool(x.transpose(1, 2))  # B C 1
         x = torch.flatten(x, 1)
-        return x
+        return x, loc_loss
 
     def forward(self, x):
-        x = self.forward_features(x)
+        x, loc_loss = self.forward_features(x)
         x = self.head(x)
-        return x
+        return x, loc_loss
 
     def flops(self):
         flops = 0
