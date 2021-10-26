@@ -11,7 +11,7 @@ from models.swin_transformer import SwinTransformer
 
 
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '0, 1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 
 def prepare_data(dataset, dataset_path):
