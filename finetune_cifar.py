@@ -101,6 +101,8 @@ def warm_up(model, cifar_trainloader, cifar_testloader, warm_up_epochs):
                 correct += (predicted==labels).sum().item()
 
         print("Warm-up epoch {} correct rate: {}".format(epoch, correct / total))
+        with open('record.txt', 'a') as f:
+            f.write("Warm-up epoch {} correct rate: {}\n".format(epoch, correct / total))
 
     for p in model.parameters():   # warm-up 结束后，恢复参数梯度
         p.requires_grad = True
@@ -112,17 +114,27 @@ if __name__ == '__main__':
 
     # model = load_model("", num_classes=10)                                              # training from scratch
     model = load_model("save_model/swin_tiny_patch4_window7_224.pth", num_classes=10)   # for finetuning
-    
+    file = open("record.txt", "w")
+    file.close()
+
     warm_up(model, cifar_trainloader, cifar_testloader, warm_up_epochs=10)
 
 
     epochs = 100
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.AdamW(model.parameters(), lr=0.0005, weight_decay=0.05)
+    backbone = [k for k, v in model.named_parameters() if 'head' not in k]
+    cls_head = [k for k, v in model.named_parameters() if 'head' in k]
+    
+    print("backbone: ", backbone)
+    print("cls_head: ", cls_head)
+
+    optimizer = optim.AdamW([{'params': cls_head},
+                             {'params': backbone, 'lr': 0.0001}], 
+                            lr=0.0005, 
+                            weight_decay=0.05)
+
     scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, epochs)
 
-    file = open("record.txt", "w")
-    file.close()
     for epoch in range(epochs):
         model.train()
         for i, data in enumerate(cifar_trainloader):
