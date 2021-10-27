@@ -1,0 +1,10 @@
+Warm-up epoch 0 correct rate: 0.8733
+Warm-up epoch 1 correct rate: 0.8859
+Warm-up epoch 2 correct rate: 0.8914
+Warm-up epoch 3 correct rate: 0.8957
+Warm-up epoch 4 correct rate: 0.8997
+Warm-up epoch 5 correct rate: 0.9019
+Warm-up epoch 6 correct rate: 0.9039
+Warm-up epoch 7 correct rate: 0.904
+Warm-up epoch 8 correct rate: 0.9066
+Warm-up epoch 9 correct rate: 0.9072

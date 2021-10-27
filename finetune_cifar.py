@@ -122,8 +122,8 @@ if __name__ == '__main__':
 
     epochs = 100
     criterion = nn.CrossEntropyLoss()
-    backbone = [k for k, v in model.named_parameters() if 'head' not in k]
-    cls_head = [k for k, v in model.named_parameters() if 'head' in k]
+    backbone = [v for k, v in model.named_parameters() if 'head' not in k]
+    cls_head = [v for k, v in model.named_parameters() if 'head' in k]
     
     print("backbone: ", backbone)
     print("cls_head: ", cls_head)
