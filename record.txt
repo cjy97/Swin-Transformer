@@ -1,10 +1,97 @@
-Warm-up epoch 0 correct rate: 0.8733
-Warm-up epoch 1 correct rate: 0.8859
+Warm-up epoch 0 correct rate: 0.8699
+Warm-up epoch 1 correct rate: 0.8867
 Warm-up epoch 2 correct rate: 0.8914
-Warm-up epoch 3 correct rate: 0.8957
-Warm-up epoch 4 correct rate: 0.8997
-Warm-up epoch 5 correct rate: 0.9019
-Warm-up epoch 6 correct rate: 0.9039
-Warm-up epoch 7 correct rate: 0.904
-Warm-up epoch 8 correct rate: 0.9066
-Warm-up epoch 9 correct rate: 0.9072
+Warm-up epoch 3 correct rate: 0.8959
+Warm-up epoch 4 correct rate: 0.8987
+Warm-up epoch 5 correct rate: 0.9015
+Warm-up epoch 6 correct rate: 0.9025
+Warm-up epoch 7 correct rate: 0.9039
+Warm-up epoch 8 correct rate: 0.9054
+Warm-up epoch 9 correct rate: 0.9066
+Epoch 0 correct rate: 0.9686
+Epoch 1 correct rate: 0.9713
+Epoch 2 correct rate: 0.9736
+Epoch 3 correct rate: 0.9718
+Epoch 4 correct rate: 0.9739
+Epoch 5 correct rate: 0.9725
+Epoch 6 correct rate: 0.9702
+Epoch 7 correct rate: 0.9725
+Epoch 8 correct rate: 0.9707
+Epoch 9 correct rate: 0.9729
+Epoch 10 correct rate: 0.9732
+Epoch 11 correct rate: 0.9668
+Epoch 12 correct rate: 0.9732
+Epoch 13 correct rate: 0.9718
+Epoch 14 correct rate: 0.9722
+Epoch 15 correct rate: 0.9678
+Epoch 16 correct rate: 0.9718
+Epoch 17 correct rate: 0.9641
+Epoch 18 correct rate: 0.9681
+Epoch 19 correct rate: 0.9719
+Epoch 20 correct rate: 0.9693
+Epoch 21 correct rate: 0.9732
+Epoch 22 correct rate: 0.9751
+Epoch 23 correct rate: 0.976
+Epoch 24 correct rate: 0.9748
+Epoch 25 correct rate: 0.9737
+Epoch 26 correct rate: 0.9747
+Epoch 27 correct rate: 0.9747
+Epoch 28 correct rate: 0.9738
+Epoch 29 correct rate: 0.9722
+Epoch 30 correct rate: 0.9723
+Epoch 31 correct rate: 0.9724
+Epoch 32 correct rate: 0.9706
+Epoch 33 correct rate: 0.9761
+Epoch 34 correct rate: 0.971
+Epoch 35 correct rate: 0.974
+Epoch 36 correct rate: 0.971
+Epoch 37 correct rate: 0.9743
+Epoch 38 correct rate: 0.9744
+Epoch 39 correct rate: 0.9718
+Epoch 40 correct rate: 0.9671
+Epoch 41 correct rate: 0.961
+Epoch 42 correct rate: 0.9704
+Epoch 43 correct rate: 0.9728
+Epoch 44 correct rate: 0.9753
+Epoch 45 correct rate: 0.9696
+Epoch 46 correct rate: 0.9719
+Epoch 47 correct rate: 0.9707
+Epoch 48 correct rate: 0.9708
+Epoch 49 correct rate: 0.9725
+Epoch 50 correct rate: 0.9715
+Epoch 51 correct rate: 0.9733
+Epoch 52 correct rate: 0.9708
+Epoch 53 correct rate: 0.9734
+Epoch 54 correct rate: 0.9708
+Epoch 55 correct rate: 0.9721
+Epoch 56 correct rate: 0.9744
+Epoch 57 correct rate: 0.968
+Epoch 58 correct rate: 0.9696
+Epoch 59 correct rate: 0.9705
+Epoch 60 correct rate: 0.9707
+Epoch 61 correct rate: 0.9706
+Epoch 62 correct rate: 0.9691
+Epoch 63 correct rate: 0.9702
+Epoch 64 correct rate: 0.9701
+Epoch 65 correct rate: 0.9708
+Epoch 66 correct rate: 0.9664
+Epoch 67 correct rate: 0.9677
+Epoch 68 correct rate: 0.9716
+Epoch 69 correct rate: 0.9742
+Epoch 70 correct rate: 0.9749
+Epoch 71 correct rate: 0.9767
+Epoch 72 correct rate: 0.9748
+Epoch 73 correct rate: 0.9733
+Epoch 74 correct rate: 0.9752
+Epoch 75 correct rate: 0.9729
+Epoch 76 correct rate: 0.9754
+Epoch 77 correct rate: 0.972
+Epoch 78 correct rate: 0.9761
+Epoch 79 correct rate: 0.9765
+Epoch 80 correct rate: 0.9725
+Epoch 81 correct rate: 0.9743
+Epoch 82 correct rate: 0.9734
+Epoch 83 correct rate: 0.9748
+Epoch 84 correct rate: 0.974
+Epoch 85 correct rate: 0.9735
+Epoch 86 correct rate: 0.9706
