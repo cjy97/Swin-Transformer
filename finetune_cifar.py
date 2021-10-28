@@ -11,7 +11,7 @@ from models.swin_transformer import SwinTransformer
 
 
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+os.environ['CUDA_VISIBLE_DEVICES'] = '2'
 
 
 def prepare_data(dataset, dataset_path):
@@ -112,12 +112,12 @@ if __name__ == '__main__':
     cifar_trainloader, cifar_testloader = prepare_data('CIFAR10', './dataset')
     # cifar_trainloader, cifar_testloader = prepare_data('CIFAR100', './dataset')
 
-    # model = load_model("", num_classes=10)                                              # training from scratch
-    model = load_model("save_model/swin_tiny_patch4_window7_224.pth", num_classes=10)   # for finetuning
-    file = open("record.txt", "w")
+    model = load_model("", num_classes=10)                                              # training from scratch
+    # model = load_model("save_model/swin_tiny_patch4_window7_224.pth", num_classes=10)   # for finetuning
+    file = open("record_from_scratch.txt", "w")
     file.close()
 
-    warm_up(model, cifar_trainloader, cifar_testloader, warm_up_epochs=10)
+    warm_up(model, cifar_trainloader, cifar_testloader, warm_up_epochs=20)
 
 
     epochs = 100
@@ -130,7 +130,7 @@ if __name__ == '__main__':
 
     optimizer = optim.AdamW([{'params': cls_head},
                              {'params': backbone, 'lr': 0.0001}], 
-                            lr=0.0005, 
+                            lr=0.001, 
                             weight_decay=0.05)
 
     scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, epochs)
