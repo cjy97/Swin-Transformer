@@ -84,7 +84,8 @@ def warm_up(model, cifar_trainloader, cifar_testloader, warm_up_epochs):
             loss.backward()
 
             optimizer.step()
-            scheduler.step()
+        
+        scheduler.step()
 
         model.eval()
         correct = 0
@@ -114,7 +115,7 @@ if __name__ == '__main__':
 
     model = load_model("", num_classes=10)                                              # training from scratch
     # model = load_model("save_model/swin_tiny_patch4_window7_224.pth", num_classes=10)   # for finetuning
-    file = open("record_from_scratch.txt", "w")
+    file = open("record.txt", "w")
     file.close()
 
     warm_up(model, cifar_trainloader, cifar_testloader, warm_up_epochs=20)
@@ -150,7 +151,8 @@ if __name__ == '__main__':
             loss.backward()
 
             optimizer.step()
-            scheduler.step()
+        
+        scheduler.step()
 
         model.eval()
         correct = 0
