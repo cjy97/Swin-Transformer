@@ -1,5 +1,6 @@
 save_model/
 dataset/
+record*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
