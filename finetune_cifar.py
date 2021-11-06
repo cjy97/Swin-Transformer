@@ -11,7 +11,7 @@ from models.swin_transformer import SwinTransformer
 
 
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '2'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 
 def prepare_data(dataset, dataset_path):
@@ -59,50 +59,61 @@ def load_model(model_path, num_classes):
 
     return model
 
-def warm_up(model, cifar_trainloader, cifar_testloader, warm_up_epochs):
+
+
+def train_one_epoch(model, cifar_trainloader, optimizer, criterion):
+    model.train()
+    for i, data in enumerate(cifar_trainloader):
+        inputs, labels = data
+        # print("inputs: ", inputs.size())
+    
+        optimizer.zero_grad()
+        inputs = inputs.cuda()
+        labels = labels.cuda()
+        outputs = model(inputs)
+        loss = criterion(outputs, labels)
+        print(i, "  loss: ", loss)
+        loss.backward()
+
+        optimizer.step()
+
+def test_on_cifar(model, cifar_testloader):
+    model.eval()
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for data in cifar_testloader:
+            inputs, labels = data
+            inputs = inputs.cuda()
+            labels = labels.cuda()
+            outputs = model(inputs)
+            _, predicted = torch.max(outputs.data, 1)
+
+            total += labels.size(0)
+            correct += (predicted==labels).sum().item()
+
+    return correct, total
+from timm.scheduler.cosine_lr import CosineLRScheduler
+
+def warm_up(model, cifar_trainloader, cifar_testloader, warm_up_epochs, record_file):
     for k, p in model.named_parameters():
         if "head" not in k:         # 固定除最后一个Linear外的其他参数梯度
             p.requires_grad = False
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.AdamW(filter(lambda p: p.requires_grad, model.parameters()), lr=0.001, weight_decay=0.05) # 过滤，只训练最后一个Linear
-    scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, warm_up_epochs)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, warm_up_epochs)
 
     print(len(cifar_trainloader))
     for epoch in range(warm_up_epochs):
-        model.train()
-        for i, data in enumerate(cifar_trainloader):
-            inputs, labels = data
-            # print("inputs: ", inputs.size())
-    
-            optimizer.zero_grad()
-            inputs = inputs.cuda()
-            labels = labels.cuda()
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
-            print(i, "  loss: ", loss)
-            loss.backward()
-
-            optimizer.step()
+        train_one_epoch(model, cifar_trainloader, optimizer, criterion)
         
         scheduler.step()
 
-        model.eval()
-        correct = 0
-        total = 0
-        with torch.no_grad():
-            for data in cifar_testloader:
-                inputs, labels = data
-                inputs = inputs.cuda()
-                labels = labels.cuda()
-                outputs = model(inputs)
-                _, predicted = torch.max(outputs.data, 1)
-
-                total += labels.size(0)
-                correct += (predicted==labels).sum().item()
+        correct, total = test_on_cifar(model, cifar_testloader)
 
         print("Warm-up epoch {} correct rate: {}".format(epoch, correct / total))
-        with open('record.txt', 'a') as f:
+        with open(record_file, 'a') as f:
             f.write("Warm-up epoch {} correct rate: {}\n".format(epoch, correct / total))
 
     for p in model.parameters():   # warm-up 结束后，恢复参数梯度
@@ -115,10 +126,13 @@ if __name__ == '__main__':
 
     model = load_model("", num_classes=10)                                              # training from scratch
     # model = load_model("save_model/swin_tiny_patch4_window7_224.pth", num_classes=10)   # for finetuning
-    file = open("record.txt", "w")
+
+    record_file = "record_from_scratch_same_lr_decay.txt"
+    file = open(record_file, "w")
     file.close()
 
-    warm_up(model, cifar_trainloader, cifar_testloader, warm_up_epochs=20)
+    warm_up_epochs=20
+    warm_up(model, cifar_trainloader, cifar_testloader, warm_up_epochs, record_file)
 
 
     epochs = 100
@@ -129,45 +143,31 @@ if __name__ == '__main__':
     print("backbone: ", backbone)
     print("cls_head: ", cls_head)
 
-    optimizer = optim.AdamW([{'params': cls_head},
-                             {'params': backbone, 'lr': 0.0001}], 
+    from optimizer import set_weight_decay
+    skip = {}
+    skip_keywords = {}
+    if hasattr(model, 'no_weight_decay'):
+        skip = model.no_weight_decay()
+    if hasattr(model, 'no_weight_decay_keywords'):
+        skip_keywords = model.no_weight_decay_keywords()
+    parameters = set_weight_decay(model, skip, skip_keywords)
+
+    optimizer = optim.AdamW(parameters, 
+                            #model.parameters(),
+                            # [{'params': cls_head},
+                            # {'params': backbone, 'lr': 0.0001}], 
                             lr=0.001, 
                             weight_decay=0.05)
 
-    scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, epochs)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, epochs)
 
     for epoch in range(epochs):
-        model.train()
-        for i, data in enumerate(cifar_trainloader):
-            inputs, labels = data
-            # print("inputs: ", inputs.size())
-    
-            optimizer.zero_grad()
-            inputs = inputs.cuda()
-            labels = labels.cuda()
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
-            print(i, "  loss: ", loss)
-            loss.backward()
-
-            optimizer.step()
+        train_one_epoch(model, cifar_trainloader, optimizer, criterion)
         
         scheduler.step()
 
-        model.eval()
-        correct = 0
-        total = 0
-        with torch.no_grad():
-            for data in cifar_testloader:
-                inputs, labels = data
-                inputs = inputs.cuda()
-                labels = labels.cuda()
-                outputs = model(inputs)
-                _, predicted = torch.max(outputs.data, 1)
-
-                total += labels.size(0)
-                correct += (predicted==labels).sum().item()
+        correct, total = test_on_cifar(model, cifar_testloader)
 
         print("Epoch {} correct rate: {}".format(epoch, correct / total))
-        with open('record.txt', 'a') as f:
+        with open(record_file, 'a') as f:
             f.write("Epoch {} correct rate: {}\n".format(epoch, correct / total))
